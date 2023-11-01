@@ -1,4 +1,4 @@
-# CSCI6461 Team Project Phase 1
+# CSCI6461 Team Project Phase 1 and Phase 2
 ## _User Manual_
 ___
 ### Team Details -
@@ -33,6 +33,7 @@ javac Main.java && java Main
 
 ![SS1](https://drive.google.com/uc?id=152jr_vBGIfPE8kj17s42rvHgS5UxuJTw)
 
+# -> PHASE 1
 ### 3. Running the simulator
 To run the program click on the init button (highlighted in yellow in fig. below) that would bring the file upload dialogbox.
 
@@ -56,3 +57,12 @@ Now there are two options to choose to test the simulator
 - You can run the program directly by using the ```run``` Button. As soon as the Run button is pressed, the PC will increment or jump to other instructions on its own and the Run indicator will turn GREEN. Once the program comes to a halt, the halt LED indicator will turn RED and the Run indicator will turn BLACK. After this no more programs can be run unless it is reset. The simulator will be in halt state till it is reset.
 
 ![SS5](https://drive.google.com/uc?id=1J4lwx_x-JsxCaKtaYNedzPV7hcRoTl6m)
+
+# PHASE 2
+
+### 5. Running Assembler code
+![SS6](https://drive.google.com/uc?id=1tBGZECRRZXdY7YAjdZBvJdC613Kmm6eZ)
+- Follow steps 1-3 
+- Click on ```Assemble``` button which will pop up a file selector.
+- Choose the input file with set of instructions.
+- ```AssemblerOutput.txt``` will be generated in the folder with encoded hex values.
