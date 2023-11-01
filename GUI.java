@@ -1,11 +1,13 @@
 import javax.swing.*;
 import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.FileWriter;
 /* This file contains all of the front panel interface's GUI Components and event handlers. This file is also used for all input and output actions. */
 
 public class GUI extends JFrame {
@@ -14,16 +16,25 @@ public class GUI extends JFrame {
     private JLabel GPR[], X[], PC, MAR, MBR, IR, MFR, Priv;
     private Label gpr0_arr[], gpr1_arr[], gpr2_arr[], gpr3_arr[];
     private Label XLabel[][], pclab[], marlab[], mbrlab[], mfrlab[], irlab[], privlab, hlt, Run;
-    private JButton LDarr[], store, st_plus, load, init, ss, run;
+    private JButton LDarr[], store, st_plus, load, init, ss, run, assemble;
     private CPU cpu;
     private Memory mem;
     private File file;
     private ArrayList<StringStruct> Code;
-
+    // private Assembler assem;
     private ArrayList<JButton> switches;
     private JPanel Pan[];
     private Devices dev;
     char swarr[]; // Array for the switches pressed
+    private Map<String, String> labelMap = new HashMap<>();
+    // private Map<String, String> outMap = new HashMap<>();
+    private int pcount=0;
+    private String hexPcount = "";
+    private List<String> hexAdd = new ArrayList<String>();
+    private List<String> hexDat = new ArrayList<String>();
+
+    private Assembler assem;
+
 
     public GUI() throws NullPointerException {
         super();
@@ -36,6 +47,7 @@ public class GUI extends JFrame {
         dev = new Devices();
         cpu = new CPU(dev);
         mem = new Memory();
+        assem = new Assembler();
         hlt.setBounds(530, 520, 20, 20);
         hlt.setBackground(Color.BLACK);
         Run = new Label();
@@ -536,6 +548,24 @@ public class GUI extends JFrame {
         }
     }
 
+
+    private void loadFileForAssemble(ActionEvent e) throws IOException {
+        /*This will prompt the user to search for and load a file into the simulator*/
+        JFileChooser fCh = new JFileChooser();
+        fCh.setCurrentDirectory(new File(System.getProperty("user.dir")));
+        int res = fCh.showOpenDialog(this);
+        if (res == JFileChooser.APPROVE_OPTION) {
+            file = new File(fCh.getSelectedFile().getAbsolutePath());
+            String filename = file.getAbsolutePath();
+            JOptionPane.showMessageDialog(this, filename, "File Load Successful", JOptionPane.PLAIN_MESSAGE);
+            try {
+                ProcessFileForAssemble();
+            } catch (FileNotFoundException fnfe) {
+                fnfe.printStackTrace();
+            }
+        }
+    }
+
     private void ProcessFile() throws FileNotFoundException {
         /*
         To scan wether a file has been selected to load into the simulator, if not, it will throw out an error
@@ -551,6 +581,91 @@ public class GUI extends JFrame {
             System.out.println(hexloc + " " + hexval);
         }
         s.close();
+    }
+
+    private void ProcessFileForAssemble() throws IOException {
+        /*
+        To scan wether a file has been selected to load into the simulator, if not, it will throw out an error
+        */
+        Scanner s = new Scanner(file);
+        Scanner s2 = new Scanner(file);
+        while (s.hasNext()) {
+            
+            String loc = s.next();
+            String val = s.next();
+            if(loc.equals("LOC")){
+                pcount = Integer.parseInt(val);
+                hexPcount = cpu.inttoHexString(Integer.parseInt(val));
+            }
+            if(loc.contains(":")){
+                labelMap.put(loc.substring(0, loc.length() - 1).toLowerCase(),Integer.toString(pcount));
+            }
+        }
+        labelMap.forEach((key, value) -> System.out.println(key + " " + value));
+        
+        s.close();
+        pcount=0;
+        hexPcount=cpu.inttoHexString(pcount);
+
+        while (s2.hasNext()) {
+            String loc = s2.next();
+            String val = s2.next();
+            if(loc.equals("LOC")){
+                pcount = Integer.parseInt(val);
+                hexPcount = cpu.inttoHexString(Integer.parseInt(val));
+            }
+            if(loc.toLowerCase().equals("data")){
+                if (val.chars().allMatch( Character::isDigit)) {
+                    hexAdd.add(hexPcount);
+                    hexDat.add(cpu.inttoHexString(Integer.parseInt(val)));
+                }
+                else{
+                    hexAdd.add(hexPcount);
+                    hexDat.add(cpu.inttoHexString(Integer.parseInt(labelMap.get(val.toLowerCase()))));
+                }
+            }
+            else if(labelMap.containsKey(loc.substring(0, loc.length() - 1).toLowerCase())){
+                hexAdd.add(hexPcount);
+                if(val.equals("HLT")){
+                    hexDat.add("0000");
+                }
+                
+            }
+            else{
+                String op = assem.getOpCode(loc.toUpperCase());
+                if (op == "none") {
+                    continue;
+                }
+                String[] operands = val.split(",");
+                int l = operands.length;
+                String address = "";
+
+                if (l == 2) {
+                    address = op + "00"+ cpu.intstrtoBin(operands[0],2) + "0" + cpu.intstrtoBin(operands[1],5);
+                }
+
+                if (l == 3) {
+                    address = op + cpu.intstrtoBin(operands[0],2) + cpu.intstrtoBin(operands[1],2) + "0" + cpu.intstrtoBin(operands[2],5);
+                }
+
+                if (l == 4) {
+                    address = op + cpu.intstrtoBin(operands[0],2) + cpu.intstrtoBin(operands[1],2) + "1" + cpu.intstrtoBin(operands[2],5);
+                    System.out.println(address);
+                }
+
+                hexAdd.add(hexPcount);
+                hexDat.add(cpu.binaryToHex(address, 4));
+            }
+            pcount = pcount + 1;
+            hexPcount = cpu.inttoHexString(pcount);
+        }
+        final FileWriter outWriter = new FileWriter("AssemblerOutput.txt");
+
+        for (int i = 0; i < hexAdd.size(); i++) {
+            outWriter.write(hexAdd.get(i)+" "+ hexDat.get(i)+"\n");
+        }
+    s2.close();
+    outWriter.close();
     }
 
     /*
@@ -604,7 +719,9 @@ public class GUI extends JFrame {
         } while (OpCode != CPU.HLT);
         Run.setBackground(Color.black);
         hlt.setBackground(Color.red);
+        
     }
+
 
     private void runMainLoop() {
         /* This will set create and set the size for the main background of the GUI */
@@ -640,6 +757,22 @@ public class GUI extends JFrame {
         init.setBorderPainted(false);
         init.addActionListener(e -> loadFile(e));
         this.add(init);
+
+        assemble = new JButton("Assemble");
+        assemble.setBounds(850, 420, 120, 50);
+        assemble.setBackground(Color.RED);
+        assemble.setForeground(Color.black);
+        assemble.setOpaque(true);
+        assemble.setBorderPainted(false);
+        assemble.addActionListener(e -> {
+            try {
+                loadFileForAssemble(e);
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+        });
+        this.add(assemble);
+        
         /** This creates the "SS" button to the GUI */
         ss = new JButton("SS");
         ss.setBounds(600, 405, 65, 80);

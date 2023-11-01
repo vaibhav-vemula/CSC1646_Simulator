@@ -366,5 +366,4 @@ public class CPU extends Converter
         MFR[3] = 0;
         mem.Data[4] = BinaryToDecimal(PC, 12);
     }
-
 }
