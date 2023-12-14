@@ -1,4 +1,4 @@
-# CSCI6461 Team Project Phase 1 and Phase 2
+# CSCI6461 Team Project Phase 1, Phase 2 and Phase 3
 ## _User Manual_
 ___
 ### Team Details -
@@ -41,6 +41,7 @@ To run the program click on the init button (highlighted in yellow in fig. below
 
 Navigate the Program folder and choose which program you would like to run.
 On Accepting the file click ok then you will see in the console the lines of code that has been loaded into the memory.
+
 ![SS2](https://drive.google.com/uc?id=13yato7pvuNGm8nVeLsFGjy2vn_eNLH5J)
 
 ### 4. Testing the simulator
@@ -66,3 +67,21 @@ Now there are two options to choose to test the simulator
 - Click on ```Assemble``` button which will pop up a file selector.
 - Choose the input file with set of instructions.
 - ```AssemblerOutput.txt``` will be generated in the folder with encoded hex values.
+
+
+# PHASE 3
+
+### 6. Running Program 1
+![SS7](https://drive.google.com/uc?id=17Ls0x8W_6eHc7b7dxu4USqFw0Oi6sMFY)
+
+- Follow steps 1-3 
+- Click on ```init``` button to upload file
+- Upload ```Program1.txt``` file which is present in the root of the project directory.
+- Next, Type down 20 numbers in the keyboard and press load to store.
+- After entering 20 numbers, enter a number to find the closest number in the pop up.
+![SS8](https://drive.google.com/uc?id=1O2yMo9y9j-PqaWUvF-NoZNKPpeIqWYFR)
+
+- GUI will be updated to Entered value in the keyboard and the closest number in the printer.
+
+![SS9](https://drive.google.com/uc?id=1sd2He0DmGIpNT_d36g48OoogqrMIkvIo)
+

@@ -13,10 +13,11 @@ import java.io.FileWriter;
 public class GUI extends JFrame {
     // This class defines all of the classes and variables that will be utilized
     // later.
-    private JLabel GPR[], X[], PC, MAR, MBR, IR, MFR, Priv;
-    private Label gpr0_arr[], gpr1_arr[], gpr2_arr[], gpr3_arr[];
-    private Label XLabel[][], pclab[], marlab[], mbrlab[], mfrlab[], irlab[], privlab, hlt, Run;
-    private JButton LDarr[], store, st_plus, load, init, ss, run, assemble;
+    private JTextField textField, textField2;
+    private JLabel GPR[], X[], PC, MAR, MBR, IR, MFR, Priv, KeyBoard, Printer, ent, near;
+    private Label gpr0_arr[],gpr1_arr[],gpr2_arr[],gpr3_arr[];
+    private Label XLabel[][],pclab[],marlab[],mbrlab[],mfrlab[], irlab[], privlab, hlt, Run;
+    private JButton LDarr[], store, st_plus, load, init, ss, run, assemble, inputNumber, FindNearest;
     private CPU cpu;
     private Memory mem;
     private File file;
@@ -32,9 +33,9 @@ public class GUI extends JFrame {
     private String hexPcount = "";
     private List<String> hexAdd = new ArrayList<String>();
     private List<String> hexDat = new ArrayList<String>();
+    private List<Integer> NumbersList = new ArrayList<Integer>();
 
     private Assembler assem;
-
 
     public GUI() throws NullPointerException {
         super();
@@ -294,25 +295,25 @@ public class GUI extends JFrame {
             for (int i = 0; i < 16; i++) {
                 switch (buttonpress) {
                     case 0:
-                        if (cpu.GPR0[i] == 1)
+                        if (cpu.R0[i] == 1)
                             gpr0_arr[i].setBackground(Color.green);
                         else
                             gpr0_arr[i].setBackground(Color.black);
                         break;
                     case 1:
-                        if (cpu.GPR1[i] == 1)
+                        if (cpu.R1[i] == 1)
                             gpr1_arr[i].setBackground(Color.green);
                         else
                             gpr1_arr[i].setBackground(Color.black);
                         break;
                     case 2:
-                        if (cpu.GPR2[i] == 1)
+                        if (cpu.R2[i] == 1)
                             gpr2_arr[i].setBackground(Color.green);
                         else
                             gpr2_arr[i].setBackground(Color.black);
                         break;
                     case 3:
-                        if (cpu.GPR3[i] == 1)
+                        if (cpu.R3[i] == 1)
                             gpr3_arr[i].setBackground(Color.green);
                         else
                             gpr3_arr[i].setBackground(Color.black);
@@ -434,8 +435,8 @@ public class GUI extends JFrame {
         int click = 15 - Integer.parseInt(j.getText());
         if (swarr[click] == 0) {
             swarr[click] = 1;
-            j.setBackground(Color.getHSBColor((float) 0.0, (float) 1.0, (float) 1.0));
-            j.setForeground(Color.red);
+            j.setBackground(Color.getHSBColor((float)0.0, (float)1.0, (float)1.0));
+            j.setForeground(Color.getHSBColor((float)0.5,(float)0.5,(float)0.8));
         } else {
             swarr[click] = 0;
             j.setBackground(new JButton().getBackground());
@@ -547,7 +548,6 @@ public class GUI extends JFrame {
             }
         }
     }
-
 
     private void loadFileForAssemble(ActionEvent e) throws IOException {
         /*This will prompt the user to search for and load a file into the simulator*/
@@ -722,14 +722,46 @@ public class GUI extends JFrame {
         
     }
 
-
     private void runMainLoop() {
         /* This will set create and set the size for the main background of the GUI */
-        this.setSize(1200, 620);
+        this.setSize(1200, 860);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.getContentPane().setBackground(Color.getHSBColor((float) 0.533, (float) 0.8, (float) 0.75));
         this.setLayout(null);
         this.setVisible(true);
+        // dev.Run();
+    }
+
+
+    private int takeInput(ActionEvent e) throws IOException {
+
+        NumbersList.add(Integer.parseInt(textField.getText()));
+        textField2.setText(textField.getText());
+        textField.setText("");
+
+        if(NumbersList.size() == 20){
+            String userInput = JOptionPane.showInputDialog(null, "Enter any number to find closest", "", JOptionPane.QUESTION_MESSAGE);
+            textField.setText(userInput);
+            // textField2.setText(userInput);
+            ent.setText("Entered Value");
+            near.setText("Nearest Value");
+
+            int nearestNumber = NumbersList.get(0);
+            int minDifference = Math.abs(nearestNumber - Integer.parseInt(userInput));
+
+            for (int number : NumbersList) {
+                int difference = Math.abs((number - Integer.parseInt(userInput)));
+                if (difference < minDifference) {
+                    minDifference = difference;
+                    nearestNumber = number;
+                }
+            textField2.setText(""+nearestNumber);
+        }
+            NumbersList = new ArrayList<Integer>();
+            return 1;
+        }
+        return 0;
+        
     }
 
     public void LoadGui() {
@@ -772,7 +804,64 @@ public class GUI extends JFrame {
             }
         });
         this.add(assemble);
-        
+
+        ent = new JLabel("");
+        ent.setBounds(285, 690, 200, 50);
+        ent.setFont(new Font("Arial", Font.BOLD, 20));
+
+        near = new JLabel("");
+        near.setBounds(790, 690, 200, 50);
+        near.setFont(new Font("Arial", Font.BOLD, 20));
+
+        this.add(ent);
+        this.add(near);
+
+        KeyBoard = new JLabel("Keyboard");
+        textField = new JTextField();
+        KeyBoard.setBounds(310, 550, 200, 50);    
+        KeyBoard.setFont(new Font("Arial", Font.BOLD, 20));       
+        textField.setBounds(250, 600, 200, 100);
+        textField.setFont(new Font("Arial", Font.BOLD, 42));
+        this.add(KeyBoard);
+        this.add(textField);
+
+        Printer = new JLabel("Printer");
+        textField2 = new JTextField();
+        Printer.setBounds(840, 550, 200, 50);  
+        Printer.setFont(new Font("Arial", Font.BOLD, 20));      
+        textField2.setBounds(770, 600, 200, 100);
+        textField2.setFont(new Font("Arial", Font.BOLD, 42));
+        this.add(Printer);
+        this.add(textField2);
+
+        inputNumber = new JButton("Load");
+        inputNumber.setBounds(300, 730, 80, 40);
+        inputNumber.setBackground(Color.RED);
+        inputNumber.setForeground(Color.black);
+        inputNumber.setOpaque(true);
+        inputNumber.setBorderPainted(false);
+        inputNumber.setFont(new Font("Arial", Font.BOLD, 14));
+        inputNumber.addActionListener(e -> {
+            try {
+                takeInput(e);
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+        });
+        this.add(inputNumber);
+
+        FindNearest = new JButton("EXIT");
+        FindNearest.setBounds(800, 730, 160, 40);
+        FindNearest.setBackground(Color.RED);
+        FindNearest.setForeground(Color.black);
+        FindNearest.setOpaque(true);
+        FindNearest.setBorderPainted(false);
+        FindNearest.setFont(new Font("Arial", Font.BOLD, 14));
+        FindNearest.addActionListener(e -> {
+            System.exit(0);
+        });
+        this.add(FindNearest);
+
         /** This creates the "SS" button to the GUI */
         ss = new JButton("SS");
         ss.setBounds(600, 405, 65, 80);
